@@ -13,6 +13,7 @@ from keras.layers import ConvLSTM2D
 from keras.utils import to_categorical
 from matplotlib import pyplot
 
+from test import *
 # load a single file as a numpy array
 def load_file(filepath):
 	dataframe = read_csv(filepath, header=None, delim_whitespace=True)
@@ -29,7 +30,7 @@ def load_group(filenames, prefix=''):
 	return loaded
 
 # load a dataset group, such as train or test
-def load_dataset_group(group, prefix=''):
+def load_timeseries_dataset_group(group, prefix=''):
 	filepath = prefix + group + '/Inertial Signals/'
 	# load all 9 files as a single array
 	filenames = list()
@@ -45,22 +46,36 @@ def load_dataset_group(group, prefix=''):
 	y = load_file(prefix + group + '/y_'+group+'.txt')
 	return X, y
 
+def load_const_dataset_group(group, prefix=''):
+	X = load_file(prefix+group+'/X_'+group+'.txt')
+	y = load_file(prefix + group + '/y_' + group + '.txt')
+	return X, y
+
 # load the dataset, returns train and test X and y elements
 def load_dataset(prefix=''):
 	# load all train
-	trainX, trainy = load_dataset_group('train', prefix + 'HARDataset/')
-	print(trainX.shape, trainy.shape)
+	trainX, trainy = load_timeseries_dataset_group('train', prefix + 'HARDataset/')
+	aux_trainX, aux_trainy = load_const_dataset_group('train', prefix + 'HARDataset/')
+	print(">> Time series data shape: {0} , {1}".format(trainX.shape, trainy.shape))
+	print(">> Constant data shape: {0} , {1}".format(aux_trainX.shape, aux_trainy.shape))
 	# load all test
-	testX, testy = load_dataset_group('test', prefix + 'HARDataset/')
-	print(testX.shape, testy.shape)
+	testX, testy = load_timeseries_dataset_group('test', prefix + 'HARDataset/')
+	aux_testX, aux_testy = load_const_dataset_group('test', prefix + 'HARDataset/')
+	print(">> Time series data shape: {0} , {1}".format(testX.shape, testy.shape))
+	print(">> Constant data shape: {0} , {1}".format(aux_testX.shape, aux_testy.shape))
 	# zero-offset class values
 	trainy = trainy - 1
 	testy = testy - 1
+	aux_trainy = aux_trainy - 1
+	aux_testy = aux_testy - 1
 	# one hot encode y
 	trainy = to_categorical(trainy)
 	testy = to_categorical(testy)
-	print(trainX.shape, trainy.shape, testX.shape, testy.shape)
-	return trainX, trainy, testX, testy
+	aux_trainy = to_categorical(aux_trainy)
+	aux_testy = to_categorical(aux_testy)
+	print(">> Final shapes of time series dataset: {0}, {1}, {2}, {3}".format(trainX.shape, trainy.shape, testX.shape, testy.shape))
+	print(">> Final shapes of constant dataset: {0}, {1}, {2}, {3}".format(aux_trainX.shape, aux_trainy.shape, aux_testX.shape, aux_testy.shape))
+	return trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy
 
 # fit and evaluate a model
 def evaluate_model(trainX, trainy, testX, testy):
@@ -70,8 +85,8 @@ def evaluate_model(trainX, trainy, testX, testy):
 	# reshape into subsequences (samples, time steps, rows, cols, channels)
 	n_steps, n_length = 4, 32
 	trainX = trainX.reshape((trainX.shape[0], n_steps, 1, n_length, n_features))
-	trainX = trainX[:100]
-	trainy = trainy[:100]
+	# trainX = trainX
+	# trainy = trainy
 	testX = testX.reshape((testX.shape[0], n_steps, 1, n_length, n_features))
 	# define model
 	model = Sequential()
@@ -96,13 +111,14 @@ def summarize_results(scores):
 # run an experiment
 def run_experiment(repeats=10):
 	# load data
-	trainX, trainy, testX, testy = load_dataset()
+	trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy = load_dataset() # TODO do we need the labels again?
 	# repeat experiment
 	scores = list()
 	for r in range(repeats):
-		score = evaluate_model(trainX, trainy, testX, testy)
+		score, aux_score = evaluate_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy) # change if you want to run another model
 		score = score * 100.0
-		print('>#%d: %.3f' % (r+1, score))
+		aux_score = aux_score * 100.00 # also remove everything regarding aux_score if a different model is used
+		print('>#%d: %.3f and %.3f' % (r+1, score, aux_score))
 		scores.append(score)
 	# summarize results
 	summarize_results(scores)
