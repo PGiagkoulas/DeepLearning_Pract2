@@ -54,7 +54,3 @@ def evaluate_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, a
     #print(model.summary())
     _, _, _, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
     return accuracy, aux_acc
-
-def evaluate_fc_model(trainX, trainy, testX, testy):
-
-    return
