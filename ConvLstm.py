@@ -13,7 +13,7 @@ from keras.layers import ConvLSTM2D
 from keras.utils import to_categorical
 from matplotlib import pyplot
 
-from test import *
+from FunctionalConvLstm import *
 # load a single file as a numpy array
 def load_file(filepath):
 	dataframe = read_csv(filepath, header=None, delim_whitespace=True)
