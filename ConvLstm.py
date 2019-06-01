@@ -12,6 +12,7 @@ from keras.layers import TimeDistributed
 from keras.layers import ConvLSTM2D
 from keras.utils import to_categorical
 from matplotlib import pyplot
+from itertools import product
 
 from FunctionalConvLstm import *
 # load a single file as a numpy array
@@ -109,19 +110,55 @@ def summarize_results(scores):
 	print('Accuracy: %.3f%% (+/-%.3f)' % (m, s))
 
 # run an experiment
-def run_experiment(repeats=10):
+def run_experiment(repeats=1):
 	# load data
 	trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy = load_dataset() # TODO do we need the labels again?
-	# repeat experiment
-	scores = list()
-	for r in range(repeats):
-		score, aux_score = evaluate_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy) # change if you want to run another model
-		score = score * 100.0
-		aux_score = aux_score * 100.00 # also remove everything regarding aux_score if a different model is used
-		print('>#%d: %.3f and %.3f' % (r+1, score, aux_score))
-		scores.append(score)
+	
+	cfg_list=defineConfigurations()#list with all possible configurations
+	gridresults=list()
+	
+	for cfg in cfg_list:
+		scores = list()
+		for r in range(repeats):
+			score, aux_score = evaluate_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg) # change if you want to run another model
+			score = score * 100.0
+			aux_score = aux_score * 100.00 # also remove everything regarding aux_score if a different model is used
+			print('>#%d: %.3f and %.3f' % (r+1, score, aux_score))
+			scores.append(score)
+		gridresults.append((cfg, scores))
 	# summarize results
-	summarize_results(scores)
+	summarize_gridresults(gridresults)
+	
+def summarize_gridresults(gridresults):
+	for x in gridresults:
+		print(x[0]) #prints the config
+		summarize_results(x[1]) #prints the scores
+
+# grid search configs
+def grid_search(data, cfg_list, n_test):
+	# evaluate configs
+	scores = [repeat_evaluate(data, cfg, n_test) for cfg in cfg_list] #scores and cfg are dictionaries
+	# sort configs by error, asc
+	scores.sort(key=lambda tup: tup[1])
+	return scores
+
+
+def defineConfigurations():
+	cfgs = list()
+	parameters = giveParameters()
+	return list((dict(zip(parameters, x)) for x in product(*parameters.values())))
+	
+	
+def giveParameters():
+	#learn_rate = [0.001, 0.01, 0.1, 0.2, 0.3]
+	#verbose = [0]
+	batch_size = [64, 32]
+	#optimiser= ['adam', 'sgd']
+	epochs=[1, 10]
+	return dict(epochs=epochs, batch_size=batch_size)
+	
+    
+    
 
 # run the experiment
 run_experiment()
