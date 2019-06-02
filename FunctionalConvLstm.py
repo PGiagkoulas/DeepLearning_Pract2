@@ -3,14 +3,14 @@ from numpy import std
 from numpy import dstack
 from pandas import read_csv
 from keras.models import Sequential
-from keras.layers import Dropout, Concatenate, ConvLSTM2D, Flatten
+from keras.layers import Dropout, Concatenate, ConvLSTM2D, Flatten, MaxPooling1D, Conv1D
 from keras.layers import TimeDistributed
 from keras.utils import to_categorical
 from keras.layers import Input, Embedding, LSTM, Dense
 from keras.models import Model
 
-
-def evaluate_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg):
+# fit and evaluate a multi-input/multi-output ConvLSTM model
+def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg):
     ## datastuff
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     n_aux_features = aux_trainX.shape[1]
@@ -68,5 +68,47 @@ def evaluate_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, a
     #print(model.summary())
     _, _, _, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
     return accuracy, aux_acc
-    
-    
+
+# fit and evaluate a multi-input/multi-output CNN-LSTM model
+def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy):
+    # define model
+    verbose, epochs, batch_size = 0, 25, 64
+    n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
+    # reshape data into time steps of sub-sequences
+    n_steps, n_length = 4, 32
+    trainX = trainX.reshape((trainX.shape[0], n_steps, n_length, n_features))
+    testX = testX.reshape((testX.shape[0], n_steps, n_length, n_features))
+    # define model
+    main_input = Input(shape=(None, n_length, n_features), dtype='float32', name='main_input')
+    x = TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'))(main_input)
+    x = TimeDistributed(Conv1D(filters=64, kernel_size=3, activation='relu'))(x)
+    x = TimeDistributed(Dropout(0.5))(x)
+    x = TimeDistributed(MaxPooling1D(pool_size=2))(x)
+    x = TimeDistributed(Flatten())(x)
+    lstm_out = LSTM(units=100)(x)
+    x = Dropout(rate=0.5)(lstm_out)
+    x = Dense(100, activation='relu')(x)
+    auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(x)
+    # model = Model(inputs=main_input, outputs=auxiliary_output)
+    # model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # model.fit(trainX, trainy, epochs=epochs, batch_size=batch_size, verbose=verbose)
+    # auxiliary input shape
+    num_features = aux_trainX.shape[1]
+    # flatten output
+    #lstm_out_flat = Flatten()(lstm_out)
+    auxiliary_input = Input(shape=(num_features,), name='aux_input')
+    # combine inputs
+    x = Concatenate()([lstm_out, auxiliary_input])
+    # rest of the network
+    x = Dense(128, activation='relu')(x)
+    x = Dense(64, activation='relu')(x)
+    x = Dense(32, activation='relu')(x)
+    # final output
+    main_output = Dense(6, activation='softmax', name='main_output')(x)
+    model = Model(inputs=[main_input, auxiliary_input], outputs=[main_output, auxiliary_output])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # print(model.summary())
+    model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose)
+    _, _, _, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
+    return accuracy, aux_acc
+
