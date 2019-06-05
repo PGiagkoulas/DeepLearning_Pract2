@@ -15,6 +15,25 @@ from matplotlib import pyplot
 from itertools import product
 
 from allModels import *
+
+
+def giveParameters():
+    #learn_rate = [0.001, 0.01, 0.1, 0.2, 0.3]
+    verbose = [0]
+    batch_size = [64]
+    optimizer= ['adam', 'sgd']
+    epochs=[10]
+    activation = ['relu']
+    kernel_size_2D = [(1,3)]
+    kernel_size_1D = [3]
+    filters = [64]
+    pool_size = [2]
+    loss = ['categorical_crossentropy']
+    out_activation = ['softmax']
+    dropout_rate = [0.5]
+    return dict(verbose=verbose, epochs=epochs, batch_size=batch_size, activation=activation, kernel_size_2D=kernel_size_2D, kernel_size_1D=kernel_size_1D, filters=filters, pool_size=pool_size, loss=loss, out_activation=out_activation, optimizer=optimizer, dropout_rate=dropout_rate)
+
+
 # load a single file as a numpy array
 def load_file(filepath):
 	dataframe = read_csv(filepath, header=None, delim_whitespace=True)
@@ -95,7 +114,7 @@ def run_experiment(repeats=10):
 	for cfg in cfg_list:
 		scores = list()
 		for r in range(repeats):
-			score, aux_score = evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy) # change if you want to run another model
+			score, aux_score = evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg) # change if you want to run another model
 			score = score * 100.0
 			aux_score = aux_score * 100.00 # also remove everything regarding aux_score if a different model is used
 			print('>#%d: LSTM = %.3f and Multi = %.3f' % (r+1, score, aux_score))
@@ -124,15 +143,6 @@ def defineConfigurations():
 	return list((dict(zip(parameters, x)) for x in product(*parameters.values())))
 	
 	
-def giveParameters():
-	#learn_rate = [0.001, 0.01, 0.1, 0.2, 0.3]
-	#verbose = [0]
-	batch_size = [64]
-	#optimiser= ['adam', 'sgd']
-	epochs=[10]
-	return dict(epochs=epochs, batch_size=batch_size)
-	
-    
     
 
 # run the experiment
