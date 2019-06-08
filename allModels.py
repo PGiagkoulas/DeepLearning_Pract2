@@ -8,9 +8,10 @@ from keras.layers import TimeDistributed
 from keras.utils import to_categorical
 from keras.layers import Input, Embedding, LSTM, Dense
 from keras.models import Model
-
+import csv        
+    
 # fit and evaluate a multi-input/multi-output ConvLSTM model
-def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg):
+def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
     ## datastuff
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     n_aux_features = aux_trainX.shape[1]
@@ -18,10 +19,10 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     n_steps, n_length = 4, 32
     trainX = trainX.reshape((trainX.shape[0], n_steps, 1, n_length, n_features))
     testX = testX.reshape((testX.shape[0], n_steps, 1, n_length, n_features))
-    trainX = trainX[:100]
-    trainy = trainy[:100]
-    aux_trainX = aux_trainX[:100]
-    aux_trainy = aux_trainy[:100]
+    trainX = trainX[:50]
+    trainy = trainy[:50]
+    aux_trainX = aux_trainX[:50]
+    aux_trainy = aux_trainy[:50]
     
     ## parameterstuff
     verbose = cfg.get('verbose') if ('verbose' in cfg) else 0
@@ -61,14 +62,17 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     
     
     ## train/test
-    model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose)
+    history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]))
+    #print(history.history)
     #print(model.metrics_names)
     #print(model.summary())
-    _, _, _, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
+    _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
+    saveResults("convLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    
     return accuracy, aux_acc
 
 # fit and evaluate a multi-input/multi-output CNN-LSTM model
-def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg):
+def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
     
     
     ## data stuff
@@ -77,10 +81,10 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
     n_steps, n_length = 4, 32
     trainX = trainX.reshape((trainX.shape[0], n_steps, n_length, n_features))
     testX = testX.reshape((testX.shape[0], n_steps, n_length, n_features))
-    trainX = trainX[:100]
-    trainy = trainy[:100]
-    aux_trainX = aux_trainX[:100]
-    aux_trainy = aux_trainy[:100]
+    trainX = trainX[:50]
+    trainy = trainy[:50]
+    aux_trainX = aux_trainX[:50]
+    aux_trainy = aux_trainy[:50]
     
     ## parameterstuff
     verbose = cfg.get('verbose') if ('verbose' in cfg) else 0
@@ -128,12 +132,14 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
     
     
     # print(model.summary())
-    model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose)
-    _, _, _, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
+    history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]))
+    _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
+    
+    saveResults("cnnLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 # fit and evaluate ConvLSTM a model
-def evaluate_convlstm_model(trainX, trainy, testX, testy, cfg):
+def evaluate_model(trainX, trainy, testX, testy, cfg):
 	# define model
 	verbose, epochs, batch_size = 0, 25, 64
 	n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
@@ -184,3 +190,39 @@ def evaluate_cnnlstm_model(trainX, trainy, testX, testy, cfg):
 	# evaluate model
 	_, accuracy = model.evaluate(testX, testy, batch_size=batch_size, verbose=0)
 	return accuracy
+
+def saveResults(name, fittingProcess, accuracy, aux_accuracy, loss, aux_loss, n):
+    loss_history = fittingProcess.history['main_output_loss']
+    acc_history = fittingProcess.history['main_output_acc']
+    lstm_loss_history = fittingProcess.history['aux_output_loss']
+    lstm_acc_history = fittingProcess.history['aux_output_acc']
+    val_loss_history = fittingProcess.history['val_main_output_loss']
+    val_acc_history = fittingProcess.history['val_main_output_acc']
+    val_lstm_loss_history = fittingProcess.history['val_aux_output_loss']
+    val_lstm_acc_history = fittingProcess.history['val_aux_output_acc']
+    
+    with open( name + str(n) +'.csv', "w") as outfile:
+        outfile.write("loss,accuracy,val_loss,val_acc")
+        outfile.write("\n")
+        for ind in range(len(loss_history)):
+            outfile.write(str(loss_history[ind])+','+str(acc_history[ind])+','+str(val_loss_history[ind])+','+str(val_acc_history[ind]))
+            outfile.write("\n")
+    
+    with open( name + '-lstm' + str(n) + '.csv', "w") as outfile:
+        outfile.write("lstm_loss,lstm_accuracy,val_lstm_loss,val_lstm_acc")
+        outfile.write("\n")
+        for ind in range(len(loss_history)):
+            outfile.write(str(lstm_loss_history[ind])+','+str(lstm_acc_history[ind])+','+str(val_lstm_loss_history[ind])+','+str(val_lstm_acc_history[ind]))
+            outfile.write("\n")
+            
+    with open( name + '-modelevaluate' + str(n) + '.csv', "w") as outfile:
+        outfile.write("loss,")
+        outfile.write("accuracy")
+        outfile.write("aux_loss,")
+        outfile.write("aux_accuracy")
+        outfile.write("\n")
+        outfile.write(str(accuracy)+',')
+        outfile.write(str(loss)+',')
+        outfile.write(str(aux_accuracy))
+        outfile.write(str(aux_loss))
+        outfile.write("\n")
