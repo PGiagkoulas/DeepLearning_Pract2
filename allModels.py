@@ -133,7 +133,7 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
     return accuracy, aux_acc
 
 # fit and evaluate ConvLSTM a model
-def evaluate_model(trainX, trainy, testX, testy, cfg):
+def evaluate_convlstm_model(trainX, trainy, testX, testy, cfg):
 	# define model
 	verbose, epochs, batch_size = 0, 25, 64
 	n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
