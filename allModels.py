@@ -155,7 +155,7 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     lstm_out3=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(lstm_out2)
     lstm_out4=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=False)(lstm_out3)
     Dense_out = Dense(100, activation='relu')(lstm_out4)
-    auxiliary_output = Dense(n_outputs, activation='softmax')(Dense_out)
+    auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(Dense_out)
     num_features = aux_trainX.shape[1]
     auxiliary_input = Input(shape=(num_features,), name='aux_input')
     # combine inputs
