@@ -22,10 +22,6 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     n_steps, n_length = 4, 32
     trainX = trainX.reshape((trainX.shape[0], n_steps, 1, n_length, n_features))
     testX = testX.reshape((testX.shape[0], n_steps, 1, n_length, n_features))
-    trainX = trainX[:50]
-    trainy = trainy[:50]
-    aux_trainX = aux_trainX[:50]
-    aux_trainy = aux_trainy[:50]
 
     ## parameterstuff
     verbose, epochs, batch_size, activation, \
@@ -77,10 +73,7 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
     n_steps, n_length = 4, 32
     trainX = trainX.reshape((trainX.shape[0], n_steps, n_length, n_features))
     testX = testX.reshape((testX.shape[0], n_steps, n_length, n_features))
-    trainX = trainX[:50]
-    trainy = trainy[:50]
-    aux_trainX = aux_trainX[:50]
-    aux_trainy = aux_trainy[:50]
+
 
     ## parameterstuff
     verbose, epochs, batch_size, activation,\
