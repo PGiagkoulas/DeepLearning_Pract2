@@ -31,17 +31,17 @@ from utils import feature_selection
 def giveParameters():
     # learn_rate = [0.001, 0.01, 0.1, 0.2, 0.3]
     verbose = [0]
-    batch_size = [64]
-    optimizer = ['adam']  # , 'sgd']
-    epochs = [1, 10]
-    activation = ['relu']
+    batch_size = [64, 128]
+    optimizer = ['adam', 'sgd']
+    epochs = [50]
+    activation = ['relu', 'sigmoid', 'tanh']
     kernel_size_2D = [(1, 3)]
     kernel_size_1D = [3]
-    filters = [64]
+    filters = [64, 128]
     pool_size = [2]
     loss = ['categorical_crossentropy']
     out_activation = ['softmax']
-    dropout_rate = [0.5]
+    dropout_rate = [0, 0.25, 0.5]
     return dict(verbose=verbose, epochs=epochs, batch_size=batch_size, activation=activation,
                 kernel_size_2D=kernel_size_2D, kernel_size_1D=kernel_size_1D, filters=filters, pool_size=pool_size,
                 loss=loss, out_activation=out_activation, optimizer=optimizer, dropout_rate=dropout_rate)
@@ -51,7 +51,7 @@ def giveParameters():
 def run_experiment(repeats=10):
     # load data
     trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy = load_dataset()
-    grid = False
+    grid = True
 
     cfg_list = defineConfigurations()  # list with all possible configurations
 
