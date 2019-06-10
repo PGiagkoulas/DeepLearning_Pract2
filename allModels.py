@@ -120,7 +120,7 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     # define model
     main_input_res = Input(shape=(n_timesteps, n_features), name='residual_lstm_input')
-    lstm_out = residual_lstm_layers(main_input_res, rnn_width=9, rnn_depth=8, rnn_dropout=0.2)
+    lstm_out = residual_lstm_layers(main_input_res, rnn_width=9, rnn_depth=4, rnn_dropout=0.2)
     dense_out=Dense(100, activation='relu')(lstm_out)
     auxiliary_output=Dense(n_outputs, activation='softmax', name='aux_output')(dense_out)
     num_features = aux_trainX.shape[1]
@@ -146,20 +146,20 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
 
 # fit and evaluate a multi-input/multi-output stacked LSTM model
 def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
-    verbose, epochs, batch_size = 0, 1, 16
+    verbose, epochs, batch_size = 0, 25, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     main_input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
     lstm_out0=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(main_input_stacked)
     lstm_out1=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(lstm_out0)
     lstm_out2=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(lstm_out1)
-    lstm_out3=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(lstm_out2)
-    lstm_out4=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=False)(lstm_out3)
-    Dense_out = Dense(100, activation='relu')(lstm_out4)
+    lstm_out3=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=False)(lstm_out2)
+    #lstm_out4=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=False)(lstm_out3)
+    Dense_out = Dense(100, activation='relu')(lstm_out3)
     auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(Dense_out)
     num_features = aux_trainX.shape[1]
     auxiliary_input = Input(shape=(num_features,), name='aux_input')
     # combine inputs
-    x = Concatenate()([lstm_out4, auxiliary_input])
+    x = Concatenate()([lstm_out3, auxiliary_input])
     # rest of the network
     x = Dense(128, activation='relu')(x)
     x = Dense(64, activation='relu')(x)
@@ -173,7 +173,7 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
                         verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]))
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
-    saveResults("resLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    saveResults("stackedLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 
@@ -254,7 +254,7 @@ def evaluate_res_lstm_model(trainX, trainy, testX, testy):
 
 # fit and evaluate a stacked LSTM model
 def evaluate_stacked_lstm_model(trainX, trainy, testX, testy):
-    verbose, epochs, batch_size = 0, 1, 16
+    verbose, epochs, batch_size = 0, 25, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
     lstm_out0=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(input_stacked)
