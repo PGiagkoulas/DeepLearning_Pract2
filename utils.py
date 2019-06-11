@@ -38,12 +38,11 @@ def saveResults(name, fittingProcess, accuracy, aux_accuracy, loss, aux_loss, n)
         outfile.write("lstm_accuracy,")
         outfile.write("loss,")
         outfile.write("accuracy,")
-        
         outfile.write("\n")
         outfile.write(str(loss) + ',')
         outfile.write(str(accuracy) + ',')
-        outfile.write(str(aux_loss))
-        outfile.write(str(aux_accuracy) + ',')
+        outfile.write(str(aux_loss)+',')
+        outfile.write(str(aux_accuracy))
         outfile.write("\n")
 
 # helper function to assign hyperparameters
