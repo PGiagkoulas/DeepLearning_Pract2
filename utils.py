@@ -34,15 +34,16 @@ def saveResults(name, fittingProcess, accuracy, aux_accuracy, loss, aux_loss, n)
             outfile.write("\n")
 
     with open(name + '-modelevaluate' + str(n) + '.csv', "w") as outfile:
+        outfile.write("lstm_loss,")
+        outfile.write("lstm_accuracy,")
         outfile.write("loss,")
-        outfile.write("accuracy")
-        outfile.write("aux_loss,")
-        outfile.write("aux_accuracy")
+        outfile.write("accuracy,")
+        
         outfile.write("\n")
-        outfile.write(str(accuracy) + ',')
         outfile.write(str(loss) + ',')
-        outfile.write(str(aux_accuracy))
+        outfile.write(str(accuracy) + ',')
         outfile.write(str(aux_loss))
+        outfile.write(str(aux_accuracy) + ',')
         outfile.write("\n")
 
 # helper function to assign hyperparameters
