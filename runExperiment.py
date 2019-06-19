@@ -3,14 +3,6 @@ from numpy import mean
 from numpy import std
 from numpy import dstack
 from pandas import read_csv
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Flatten
-from keras.layers import Dropout
-from keras.layers import LSTM
-from keras.layers import TimeDistributed
-from keras.layers import ConvLSTM2D
-from keras.utils import to_categorical
 from matplotlib import pyplot
 from itertools import product
 
