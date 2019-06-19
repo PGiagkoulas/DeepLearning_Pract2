@@ -108,4 +108,4 @@ venv.bak/
 HARDataset/
 
 # result csv files
-.csv
+*.csv
