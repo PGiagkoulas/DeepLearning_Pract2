@@ -1,4 +1,4 @@
-from keras.layers import LSTM
+from keras.layers import LSTM, CuDNNLSTM
 from keras.layers import Lambda
 from keras.layers.merge import add
 from sklearn.decomposition import PCA
@@ -79,8 +79,8 @@ def residual_lstm_layers(input, rnn_width, rnn_depth, rnn_dropout):
         return_sequences = i < rnn_depth - 1
         # if the return_sequences is true, which means that this LSTM layer will output 3D instead of 2D(By default LSTM output 2D(the last time step of sequence)).
         # have the LSTM output a value for each time step in the input data.
-        x_rnn = LSTM(rnn_width, recurrent_dropout=rnn_dropout, dropout=rnn_dropout, return_sequences=return_sequences)(
-            x)
+        # x_rnn = LSTM(rnn_width, recurrent_dropout=rnn_dropout, dropout=rnn_dropout, return_sequences=return_sequences)(x)
+        x_rnn = CuDNNLSTM(rnn_width, return_sequences=return_sequences)(x)
         if return_sequences:
 
             if i > 0 or input.shape[-1] == rnn_width:

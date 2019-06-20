@@ -149,8 +149,7 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     verbose, epochs, batch_size = 0, 25, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     main_input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
-    lstm_out0 = CuDNNLSTM(100, return_sequences=True)(
-        main_input_stacked)
+    lstm_out0 = CuDNNLSTM(100, return_sequences=True)(main_input_stacked)
     lstm_out1=CuDNNLSTM(100, return_sequences=True)(lstm_out0)
     lstm_out2=CuDNNLSTM(100, return_sequences=False)(lstm_out1)
     lstm_out3=CuDNNLSTM(100, return_sequences=False)(lstm_out2)
