@@ -5,12 +5,11 @@ from pandas import read_csv
 from keras.models import Sequential
 from keras.layers import Dropout, Concatenate, ConvLSTM2D, Flatten, MaxPooling1D, Conv1D
 from keras.layers import TimeDistributed
-from keras.utils import to_categorical
 from keras.layers import Input, Embedding, LSTM, Dense, CuDNNLSTM
 from keras.models import Model
 import csv
 
-from utils import saveResults, unfold_general_hyperparameters, residual_lstm_layers
+from all_utils import saveResults, unfold_general_hyperparameters, residual_lstm_layers
 
 
 # fit and evaluate a multi-input/multi-output ConvLSTM model
@@ -31,10 +30,10 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
 
     ## modelstuff
     main_input = Input(shape=(n_steps, 1, n_length, n_features), dtype='float32', name='main_input')
-    lstm_out = ConvLSTM2D(filters=filters, kernel_size=kernel_size_2D, activation=activation)(main_input)
+    lstm_out = ConvLSTM2D(filters=filters, kernel_size=kernel_size_2D, activation=activation, name='convlstm_0')(main_input)
     x = Dropout(rate=dropout_rate)(lstm_out)
     x = Flatten()(x)
-    x = Dense(100, activation=activation)(x)
+    x = Dense(100, activation=activation, name='dense_0')(x)
     # auxiliary output of CNNLSTM part
     auxiliary_output = Dense(n_outputs, activation=out_activation, name='aux_output')(x)
 
@@ -44,9 +43,12 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     # combine inputs
     x = Concatenate()([lstm_out_flat, auxiliary_input])
     # rest of the network
-    x = Dense(128, activation=activation)(x)
-    x = Dense(64, activation=activation)(x)
-    x = Dense(32, activation=activation)(x)
+    x = Dense(96, activation=activation, name='dense_1')(x)
+    x = Dropout(rate=dropout_rate)(x)
+    x = Dense(64, activation=activation, name='dense_2')(x)
+    x = Dropout(rate=dropout_rate)(x)
+    x = Dense(32, activation=activation, name='dense_3')(x)
+    x = Dropout(rate=dropout_rate)(x)
     # final output
     main_output = Dense(n_outputs, activation=out_activation, name='main_output')(x)
     model = Model(inputs=[main_input, auxiliary_input], outputs=[main_output, auxiliary_output])
@@ -60,9 +62,9 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     # print(model.summary())
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
-    saveResults("convLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    # saveResults("convLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
 
-    return accuracy, aux_acc
+    return accuracy, aux_acc, model
 
 
 # fit and evaluate a multi-input/multi-output CNN-LSTM model
@@ -82,23 +84,23 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
 
     ## define model
     main_input = Input(shape=(None, n_length, n_features), dtype='float32', name='main_input')
-    x = TimeDistributed(Conv1D(filters=filters, kernel_size=kernel_size_1D, activation='relu'))(main_input)
-    x = TimeDistributed(Conv1D(filters=filters, kernel_size=kernel_size_1D, activation='relu'))(x)
+    x = TimeDistributed(Conv1D(filters=filters, kernel_size=kernel_size_1D, activation='relu'), name='tdconv1d_0')(main_input)
+    x = TimeDistributed(Conv1D(filters=filters, kernel_size=kernel_size_1D, activation='relu'), name='tdconv1d_1')(x)
     x = TimeDistributed(Dropout(dropout_rate))(x)
     x = TimeDistributed(MaxPooling1D(pool_size=pool_size))(x)
     x = TimeDistributed(Flatten())(x)
-    lstm_out = LSTM(units=100)(x)
+    lstm_out = LSTM(units=100, name='lstm_0')(x)
     x = Dropout(rate=dropout_rate)(lstm_out)
-    x = Dense(100, activation=activation)(x)
+    x = Dense(100, activation=activation, name='dense_0')(x)
     auxiliary_output = Dense(n_outputs, activation=out_activation, name='aux_output')(x)
     num_features = aux_trainX.shape[1]
     auxiliary_input = Input(shape=(num_features,), name='aux_input')
     # combine inputs
     x = Concatenate()([lstm_out, auxiliary_input])
     # rest of the network
-    x = Dense(128, activation=activation)(x)
-    x = Dense(64, activation=activation)(x)
-    x = Dense(32, activation=activation)(x)
+    x = Dense(128, activation=activation, name='dense_1')(x)
+    x = Dense(64, activation=activation, name='dense_2')(x)
+    x = Dense(32, activation=activation, name='dense_3')(x)
     # final output
     main_output = Dense(n_outputs, activation=out_activation, name='main_output')(x)
     model = Model(inputs=[main_input, auxiliary_input], outputs=[main_output, auxiliary_output])
@@ -109,8 +111,8 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
 
-    saveResults("cnnLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
-    return accuracy, aux_acc
+    # saveResults("cnnLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    return accuracy, aux_acc, model
 
 
 # fit and evaluate a multi-input/multi-output residual LSTM model
@@ -119,7 +121,7 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     # define model
     main_input_res = Input(shape=(n_timesteps, n_features), name='residual_lstm_input')
-    lstm_out = residual_lstm_layers(main_input_res, rnn_width=9, rnn_depth=4, rnn_dropout=0.2)
+    lstm_out = residual_lstm_layers(main_input_res, rnn_width=100, rnn_depth=4, rnn_dropout=0.2)
     dense_out = Dense(100, activation='relu')(lstm_out)
     auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(dense_out)
     num_features = aux_trainX.shape[1]
@@ -272,18 +274,3 @@ def evaluate_stacked_lstm_model(trainX, trainy, testX, testy):
     _, accuracy = model.evaluate(x=testX, y=testy, batch_size=batch_size, verbose=verbose)
     return accuracy
 
-
-def evaluate_model(trainX, trainy, testX, testy):
-    verbose, epochs, batch_size = 0, 15, 64
-    n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
-    model = Sequential()
-    model.add(CuDNNLSTM(100, input_shape=(n_timesteps, n_features)))
-    model.add(Dropout(0.5))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(n_outputs, activation='softmax'))
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    # fit network
-    model.fit(trainX, trainy, epochs=epochs, batch_size=batch_size, verbose=verbose)
-    # evaluate model
-    _, accuracy = model.evaluate(testX, testy, batch_size=batch_size, verbose=0)
-    return accuracy
