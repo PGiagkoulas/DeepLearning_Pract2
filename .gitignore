@@ -109,3 +109,4 @@ HARDataset/
 
 # result csv files
 *.csv
+*.h5
