@@ -6,6 +6,8 @@ from keras.models import Sequential
 from keras.layers import Dropout, Concatenate, ConvLSTM2D, Flatten, MaxPooling1D, Conv1D
 from keras.layers import TimeDistributed
 from keras.layers import Input, Embedding, LSTM, Dense, CuDNNLSTM
+#from tensorflow.keras.layers import CuDNNLSTM #Native keras does not go well with keras. 
+#from tensorflow.python.keras.layers import CuDNNLSTM
 from keras.models import Model
 import csv
 from keras.callbacks import ModelCheckpoint
@@ -159,7 +161,7 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     main_input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
     lstm_out0 = CuDNNLSTM(100, return_sequences=True)(main_input_stacked)
     lstm_out1 = CuDNNLSTM(100, return_sequences=True)(lstm_out0)
-    lstm_out2 = CuDNNLSTM(100, return_sequences=False)(lstm_out1)
+    lstm_out2 = CuDNNLSTM(100, return_sequences=True)(lstm_out1)
     lstm_out3 = CuDNNLSTM(100, return_sequences=False)(lstm_out2)
     drop_out0 = Dropout(rate=0.5)(lstm_out3)
     # lstm_out4=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=False)(lstm_out3)
@@ -168,7 +170,7 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     num_features = aux_trainX.shape[1]
     auxiliary_input = Input(shape=(num_features,), name='aux_input')
     # combine inputs
-    x = Concatenate()([lstm_out2, auxiliary_input])
+    x = Concatenate()([lstm_out3, auxiliary_input])
     # rest of the network
     x = Dense(128, activation='relu')(x)
     x = Dense(64, activation='relu')(x)
