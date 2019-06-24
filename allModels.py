@@ -8,6 +8,7 @@ from keras.layers import TimeDistributed
 from keras.layers import Input, Embedding, LSTM, Dense, CuDNNLSTM
 from keras.models import Model
 import csv
+from keras.callbacks import ModelCheckpoint
 
 from all_utils import saveResults, unfold_general_hyperparameters, residual_lstm_layers
 
@@ -53,10 +54,11 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     main_output = Dense(n_outputs, activation=out_activation, name='main_output')(x)
     model = Model(inputs=[main_input, auxiliary_input], outputs=[main_output, auxiliary_output])
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-
+    # checkpoint
+    checkpointer = ModelCheckpoint(filepath='conv_lstm.h5', monitor = 'val_main_output_acc', verbose = 1, save_best_only = True, save_weights_only = False, mode = 'auto', period = 1)
     ## train/test
     history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size,
-                        verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]))
+                        verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     # print(history.history)
     # print(model.metrics_names)
     # print(model.summary())
@@ -105,9 +107,11 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
     main_output = Dense(n_outputs, activation=out_activation, name='main_output')(x)
     model = Model(inputs=[main_input, auxiliary_input], outputs=[main_output, auxiliary_output])
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-
+    # checkpoint
+    checkpointer = ModelCheckpoint(filepath='cnn_lstm.h5', monitor='val_main_output_acc', verbose=1,
+                                   save_best_only=True, save_weights_only=False, mode='auto', period=1)
     history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size,
-                        verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]))
+                        verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
 
@@ -274,3 +278,9 @@ def evaluate_stacked_lstm_model(trainX, trainy, testX, testy):
     _, accuracy = model.evaluate(x=testX, y=testy, batch_size=batch_size, verbose=verbose)
     return accuracy
 
+MODELS = {
+    'conv_lstm': evaluate_convlstm_multi_model,
+    'cnn_lstm': evaluate_cnnlstm_multi_model,
+    'res_lstm': evaluate_res_lstm_multi_model,
+    'stacked_lstm': evaluate_stacked_lstm_multi_model
+}
