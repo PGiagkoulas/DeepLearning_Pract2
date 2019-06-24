@@ -140,9 +140,11 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     main_output = Dense(n_outputs, activation='softmax', name='main_output')(x)
     model = Model(inputs=[main_input_res, auxiliary_input], outputs=[main_output, auxiliary_output])
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
+    # checkpoint
+    checkpointer = ModelCheckpoint(filepath='res_lstm.h5', monitor='val_main_output_acc', verbose=1,
+                                   save_best_only=True, save_weights_only=False, mode='auto', period=1)
     history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size,
-                        verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]))
+                        verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
     saveResults("resLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
@@ -175,8 +177,10 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     main_output = Dense(n_outputs, activation='softmax', name='main_output')(x)
     model = Model(inputs=[main_input_stacked, auxiliary_input], outputs=[main_output, auxiliary_output])
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]))
+    # checkpoint
+    checkpointer = ModelCheckpoint(filepath='res_lstm.h5', monitor='val_main_output_acc', verbose=1,
+                                   save_best_only=True, save_weights_only=False, mode='auto', period=1)
+    history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
     saveResults("stackedLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
