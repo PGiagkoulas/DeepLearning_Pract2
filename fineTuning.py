@@ -1,7 +1,7 @@
 from keras.models import load_model
 from keras.models import Model
 from all_utils import load_dataset
-
+from keras.callbacks import ModelCheckpoint
 
 # fine-tuning FC layers of ConvLSTM
 def fine_tune_convlstm():
@@ -14,7 +14,7 @@ def fine_tune_convlstm():
     trainX = trainX.reshape((trainX.shape[0], n_steps, 1, n_length, n_features))
     testX = testX.reshape((testX.shape[0], n_steps, 1, n_length, n_features))
     # load model
-    model = load_model('convlstm.h5')
+    model = load_model('conv_lstm.h5')
     print(model.summary())
     _, _, _, saved_accuracy, _ = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=128, verbose=1)
     # freeze layers
@@ -23,16 +23,20 @@ def fine_tune_convlstm():
     model.get_layer('aux_output').trainable = False
     # recompile for freeze to take effect
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # checkpoint
+    checkpointer = ModelCheckpoint(filepath='conv_lstm_opt.h5', monitor='val_main_output_acc', verbose=1,
+                                   save_best_only=True, save_weights_only=False, mode='auto', period=1)
     # re-train
     model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=30, batch_size=128,
-              verbose=1, validation_data=([testX, aux_testX], [testy, aux_testy]))
-    # evaluate re-trained model
-    _, _, _, tuned_accuracy, _ = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
+              verbose=1, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
+
+    # load and evaluate best re-trained model
+    opt_model = load_model('conv_lstm_opt.h5')
+    _, _, _, tuned_accuracy, _ = opt_model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=128, verbose=1)
     print(">> Saved model accuracy is: {0}".format(saved_accuracy))
     print(">> Fine-tuned model accuracy is: {0}".format(tuned_accuracy))
-    model.save("convlstm_final.h5")
-    print("Saved fine-tuned model to disk")
+
 
 # fine-tuning FC layers of ConvLSTM
 def fine_tune_cnnlstm():
@@ -45,7 +49,7 @@ def fine_tune_cnnlstm():
     trainX = trainX.reshape((trainX.shape[0], n_steps, n_length, n_features))
     testX = testX.reshape((testX.shape[0], n_steps, n_length, n_features))
     # load model
-    model = load_model('cnnlstm.h5')
+    model = load_model('cnn_lstm.h5')
     print(model.summary())
     _, _, _, saved_accuracy, _ = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=128, verbose=1)
     # freeze layers
@@ -56,16 +60,18 @@ def fine_tune_cnnlstm():
     model.get_layer('aux_output').trainable = False
     # recompile for freeze to take effect
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # checkpoint
+    checkpointer = ModelCheckpoint(filepath='cnn_lstm_opt.h5', monitor='val_main_output_acc', verbose=1,
+                                   save_best_only=True, save_weights_only=False, mode='auto', period=1)
     # re-train
-    model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=25, batch_size=128,
-              verbose=1, validation_data=([testX, aux_testX], [testy, aux_testy]))
-    # evaluate re-trained model
-    _, _, _, tuned_accuracy, _ = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
+    model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=30, batch_size=128,
+              verbose=1, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
+    # load and evaluate best re-trained model
+    opt_model = load_model('cnn_lstm_opt.h5')
+    _, _, _, tuned_accuracy, _ = opt_model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=128, verbose=1)
     print(">> Saved model accuracy is: {0}".format(saved_accuracy))
     print(">> Fine-tuned model accuracy is: {0}".format(tuned_accuracy))
-    model.save("cnnlstm_final.h5")
-    print("Saved fine-tuned model to disk")
 
 if __name__== "__main__":
     fine_tune_cnnlstm()
