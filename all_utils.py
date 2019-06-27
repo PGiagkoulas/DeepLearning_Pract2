@@ -8,6 +8,7 @@ import numpy as np
 from numpy import dstack
 from pandas import read_csv
 from keras.utils import to_categorical
+from itertools import product
 
 
 
@@ -33,17 +34,17 @@ def giveSingleParameters():
 # give the parameters for grid search
 def giveParameters():
     verbose = [0]
-    batch_size = [128]
-    optimizer = ['adam']
-    epochs = [9]
-    activation = ['relu']
+    batch_size = [64, 128]
+    optimizer = ['adam', 'sgd']
+    epochs = [15]
+    activation = ['relu', 'tanh']
     kernel_size_2D = [(1, 3)]
     kernel_size_1D = [3]
     filters = [64]
     pool_size = [2]
     loss = ['categorical_crossentropy']
     out_activation = ['softmax']
-    dropout_rate = [0.5]
+    dropout_rate = [0.2, 0.5]
     return dict(verbose=verbose, epochs=epochs, batch_size=batch_size, activation=activation,
                 kernel_size_2D=kernel_size_2D, kernel_size_1D=kernel_size_1D, filters=filters, pool_size=pool_size,
                 loss=loss, out_activation=out_activation, optimizer=optimizer, dropout_rate=dropout_rate)
