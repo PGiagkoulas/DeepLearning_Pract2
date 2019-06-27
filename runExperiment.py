@@ -6,7 +6,7 @@ from itertools import product
 import argparse
 
 import allModels
-from all_utils import load_dataset
+from all_utils import *
 from fineTuning import fine_tune_convlstm
 
 # how to use:
@@ -23,25 +23,15 @@ from fineTuning import fine_tune_convlstm
 parser = argparse.ArgumentParser(description='Run a model.')
 parser.add_argument('--arch', type=str, default='conv_lstm',
 					help='Architecture to use.')
+parser.add_argument('--grid', type=bool, default=False,
+					help='Wether or not to do grid search.')
+parser.add_argument('--repeats', type=int, default=5,
+					help='Amount of repeats to get mean score.')
 args = parser.parse_args()
 
-def giveParameters():
-    # learn_rate = [0.001, 0.01, 0.1, 0.2, 0.3]
-    verbose = [0]
-    batch_size = [128]
-    optimizer = ['adam']
-    epochs = [9]
-    activation = ['relu']
-    kernel_size_2D = [(1, 3)]
-    kernel_size_1D = [3]
-    filters = [64]
-    pool_size = [2]
-    loss = ['categorical_crossentropy']
-    out_activation = ['softmax']
-    dropout_rate = [0.5]
-    return dict(verbose=verbose, epochs=epochs, batch_size=batch_size, activation=activation,
-                kernel_size_2D=kernel_size_2D, kernel_size_1D=kernel_size_1D, filters=filters, pool_size=pool_size,
-                loss=loss, out_activation=out_activation, optimizer=optimizer, dropout_rate=dropout_rate)
+
+                
+
 
 # run an experiment
 def run_experiment(repeats=1):
@@ -49,19 +39,26 @@ def run_experiment(repeats=1):
     trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy = load_dataset()
     grid = True
 
-    cfg_list = defineConfigurations()  # list with all possible configurations
+    if args.grid:
+        cfg_list = all_utils.defineConfigurations()  # list with all possible configurations
+    else:
+        cfg_list = [giveSingleParameters()] # when only 1 configuration needs to be run
 
+    repeats = args.repeats
     # get architecture from arguments
     model = allModels.MODELS[args.arch]
+    
     print(">> Running {0}".format(args.arch))
     gridresults = list()
 
+
+    
     for cfg in cfg_list:
         scores = list()
         for r in range(repeats):
-            score, aux_score = model(trainX, trainy, testX, testy, aux_trainX, aux_trainy,
+            score, aux_score, model = model(trainX, trainy, testX, testy, aux_trainX, aux_trainy,
                                                             aux_testX, aux_testy, cfg,
-                                                            r)  # change if you want to run another model
+                                                            grid, r)  # change if you want to run another model
             score = score * 100.0
             aux_score = aux_score * 100.00  # also remove everything regarding aux_score if a different model is used
             print('>#%d: LSTM = %.3f and Multi = %.3f' % (r + 1, aux_score, score))
@@ -69,32 +66,8 @@ def run_experiment(repeats=1):
         gridresults.append((cfg, scores))
 
     if grid:
-        summarize_gridresults(gridresults)
-    printBestGrid(gridresults)
-
-
-########################### grid functions
-
-def summarize_gridresults(gridresults):
-    for x in gridresults:
-        print(x[0])  # prints the config
-        summarize_results(x[1])  # prints the scores
-
-
-def defineConfigurations():
-    cfgs = list()
-    parameters = giveParameters()
-    return list((dict(zip(parameters, x)) for x in product(*parameters.values())))
-
-
-def printBestGrid(gridresults):
-    best = gridresults[0]
-    for x in gridresults:
-        if mean(x[1]) > mean(best[1]):
-            best = x
-    print("best result:")
-    print(best[0])
-    summarize_results(best[1])
+        all_utils.summarize_gridresults(gridresults)
+    all_utils.printBestGrid(gridresults)
 
 
 ########################### summarize scores
