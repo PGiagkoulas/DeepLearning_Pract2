@@ -16,7 +16,7 @@ from all_utils import saveResults, unfold_general_hyperparameters, residual_lstm
 
 
 # fit and evaluate a multi-input/multi-output ConvLSTM model
-def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
+def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean, n):
     ## datastuff
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     n_aux_features = aux_trainX.shape[1]
@@ -66,13 +66,14 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     # print(model.summary())
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
-    # saveResults("convLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    if grid_boolean:
+        saveResults("convLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
 
     return accuracy, aux_acc
 
 
 # fit and evaluate a multi-input/multi-output CNN-LSTM model
-def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
+def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean, n):
     ## data stuff
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     # reshape data into time steps of sub-sequences
@@ -117,12 +118,13 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
 
-    # saveResults("cnnLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    if grid_boolean:
+        saveResults("cnnLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 
 # fit and evaluate a multi-input/multi-output residual LSTM model
-def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
+def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean, n):
     verbose, epochs, batch_size = 0, 25, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     # define model
@@ -149,12 +151,13 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
                         verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
-    saveResults("resLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    if grid_boolean:
+        saveResults("resLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 
 # fit and evaluate a multi-input/multi-output stacked LSTM model
-def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg,
+def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, grid_boolean, cfg,
                                       n):
     verbose, epochs, batch_size = 0, 25, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
@@ -182,12 +185,13 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
                                    save_best_only=True, save_weights_only=False, mode='auto', period=1)
     history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
-    saveResults("stackedLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    if grid_boolean:
+        saveResults("stackedLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 
 # fit and evaluate ConvLSTM a model
-def evaluate_convlst_model(trainX, trainy, testX, testy, cfg):
+def evaluate_convlst_model(trainX, trainy, testX, testy, grid_boolean, cfg):
     # define model
     verbose, epochs, batch_size = 0, 25, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
@@ -214,7 +218,7 @@ def evaluate_convlst_model(trainX, trainy, testX, testy, cfg):
 
 
 # fit and evaluate a CNN-LSTM model
-def evaluate_cnnlstm_model(trainX, trainy, testX, testy, cfg):
+def evaluate_cnnlstm_model(trainX, trainy, testX, testy, grid_boolean, cfg):
     # define model
     verbose, epochs, batch_size = 0, 25, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
@@ -243,44 +247,7 @@ def evaluate_cnnlstm_model(trainX, trainy, testX, testy, cfg):
     return accuracy
 
 
-# fit and evaluate a residual LSTM model
-def evaluate_res_lstm_model(trainX, trainy, testX, testy):
-    verbose, epochs, batch_size = 0, 25, 64
-    n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
-    input_res = Input(shape=(n_timesteps, n_features), name='residual_lstm_input')
-    lstm_out = residual_lstm_layers(input_res, rnn_width=100, rnn_depth=8, rnn_dropout=0.2)
-    Dense_out = Dense(100, activation='relu')(lstm_out)
-    output = Dense(n_outputs, activation='softmax')(Dense_out)
-    model = Model(inputs=input_res, outputs=output)
-    # model.summary()
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    print(model.summary())
-    # fit the network
-    model.fit(x=trainX, y=trainy, epochs=epochs, batch_size=batch_size, verbose=verbose)
-    _, accuracy = model.evaluate(x=testX, y=testy, batch_size=batch_size, verbose=verbose)
-    return accuracy
 
-
-# fit and evaluate a stacked LSTM model
-def evaluate_stacked_lstm_model(trainX, trainy, testX, testy):
-    verbose, epochs, batch_size = 0, 25, 64
-    n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
-    input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
-    lstm_out0 = LSTM(9, activation='tanh', recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(input_stacked)
-    lstm_out1 = LSTM(9, activation='tanh', recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(lstm_out0)
-    lstm_out2 = LSTM(9, activation='tanh', recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(lstm_out1)
-    lstm_out3 = LSTM(9, activation='tanh', recurrent_dropout=0.2, dropout=0.2, return_sequences=True)(lstm_out2)
-    lstm_out4 = LSTM(9, activation='tanh', recurrent_dropout=0.2, dropout=0.2, return_sequences=False)(lstm_out3)
-    Dense_out = Dense(100, activation='relu')(lstm_out4)
-    output = Dense(n_outputs, activation='softmax')(Dense_out)
-    model = Model(inputs=input_stacked, outputs=output)
-    # model.summary()
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    print(model.summary())
-    # fit the network
-    model.fit(x=trainX, y=trainy, epochs=epochs, batch_size=batch_size, verbose=verbose)
-    _, accuracy = model.evaluate(x=testX, y=testy, batch_size=batch_size, verbose=verbose)
-    return accuracy
 
 MODELS = {
     'conv_lstm': evaluate_convlstm_multi_model,
