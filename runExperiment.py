@@ -42,7 +42,7 @@ def run_experiment(repeats=1):
     if args.grid:
         cfg_list = all_utils.defineConfigurations()  # list with all possible configurations
     else:
-        cfg_list = [giveSingleParameters()] # when only 1 configuration needs to be run
+        cfg_list = [all_utils.giveSingleParameters()] # when only 1 configuration needs to be run
 
     repeats = args.repeats
     # get architecture from arguments
@@ -58,7 +58,7 @@ def run_experiment(repeats=1):
         for r in range(repeats):
             score, aux_score, model = model(trainX, trainy, testX, testy, aux_trainX, aux_trainy,
                                                             aux_testX, aux_testy, cfg,
-                                                            grid, r)  # change if you want to run another model
+                                                            args.grid, r)  # change if you want to run another model
             score = score * 100.0
             aux_score = aux_score * 100.00  # also remove everything regarding aux_score if a different model is used
             print('>#%d: LSTM = %.3f and Multi = %.3f' % (r + 1, aux_score, score))
