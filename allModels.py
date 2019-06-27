@@ -129,7 +129,7 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     # define model
     main_input_res = Input(shape=(n_timesteps, n_features), name='residual_lstm_input')
-    lstm_out = residual_lstm_layers(main_input_res, rnn_width=100, rnn_depth=4, rnn_dropout=0.2)
+    lstm_out = residual_lstm_layers(main_input_res, rnn_width=50, rnn_depth=4, rnn_dropout=0.2)
     dense_out = Dense(100, activation='relu')(lstm_out)
     auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(dense_out)
     num_features = aux_trainX.shape[1]
@@ -162,9 +162,9 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     verbose, epochs, batch_size = 0, 25, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     main_input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
-    lstm_out0 = CuDNNLSTM(100, return_sequences=True)(main_input_stacked)
-    lstm_out1 = CuDNNLSTM(100, return_sequences=True)(lstm_out0)
-    lstm_out2 = CuDNNLSTM(100, return_sequences=False)(lstm_out1)
+    lstm_out0 = CuDNNLSTM(50, return_sequences=True)(main_input_stacked)
+    lstm_out1 = CuDNNLSTM(50, return_sequences=True)(lstm_out0)
+    lstm_out2 = CuDNNLSTM(50, return_sequences=False)(lstm_out1)
     drop_out0 = Dropout(rate=0.5)(lstm_out2)
     Dense_out = Dense(100, activation='relu')(drop_out0)
     auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(Dense_out)
