@@ -2,11 +2,11 @@
 from numpy import mean
 from numpy import std
 from matplotlib import pyplot
-from itertools import product
+
 import argparse
 
 import allModels
-from all_utils import *
+import all_utils 
 from fineTuning import fine_tune_convlstm
 
 # how to use:
@@ -36,7 +36,7 @@ args = parser.parse_args()
 # run an experiment
 def run_experiment(repeats=1):
     # load data
-    trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy = load_dataset()
+    trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy = all_utils.load_dataset()
     grid = True
 
     if args.grid:
