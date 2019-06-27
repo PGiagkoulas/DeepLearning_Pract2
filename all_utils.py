@@ -15,18 +15,18 @@ from itertools import product
 ########################### grid functions
 
 def giveSingleParameters():
-    verbose = [0]
-    batch_size = [128]
-    optimizer = ['adam']
-    epochs = [9]
-    activation = ['relu']
-    kernel_size_2D = [(1, 3)]
-    kernel_size_1D = [3]
-    filters = [64]
-    pool_size = [2]
-    loss = ['categorical_crossentropy']
-    out_activation = ['softmax']
-    dropout_rate = [0.5]
+    verbose = 0
+    batch_size = 128
+    optimizer = 'adam'
+    epochs = 9
+    activation = 'relu'
+    kernel_size_2D = (1, 3)
+    kernel_size_1D = 3
+    filters = 64
+    pool_size = 2
+    loss = 'categorical_crossentropy'
+    out_activation = 'softmax'
+    dropout_rate = 0.5
     return dict(verbose=verbose, epochs=epochs, batch_size=batch_size, activation=activation,
                 kernel_size_2D=kernel_size_2D, kernel_size_1D=kernel_size_1D, filters=filters, pool_size=pool_size,
                 loss=loss, out_activation=out_activation, optimizer=optimizer, dropout_rate=dropout_rate)
