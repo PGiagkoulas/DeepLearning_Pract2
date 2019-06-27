@@ -102,7 +102,7 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
     # combine inputs
     x = Concatenate()([lstm_out, auxiliary_input])
     # rest of the network
-    x = Dense(128, activation=activation, name='dense_1')(x)
+    x = Dense(96, activation=activation, name='dense_1')(x)
     x = Dense(64, activation=activation, name='dense_2')(x)
     x = Dense(32, activation=activation, name='dense_3')(x)
     # final output
@@ -135,7 +135,7 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     # combine inputs
     x = Concatenate()([lstm_out, auxiliary_input])
     # rest of the network
-    x = Dense(128, activation='relu')(x)
+    x = Dense(96, activation='relu')(x)
     x = Dense(64, activation='relu')(x)
     x = Dense(32, activation='relu')(x)
     # final output
@@ -172,7 +172,7 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     # combine inputs
     x = Concatenate()([lstm_out3, auxiliary_input])
     # rest of the network
-    x = Dense(128, activation='relu')(x)
+    x = Dense(96, activation='relu')(x)
     x = Dense(64, activation='relu')(x)
     x = Dense(32, activation='relu')(x)
     # final output

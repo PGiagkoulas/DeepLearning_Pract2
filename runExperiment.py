@@ -64,7 +64,7 @@ def run_experiment(repeats=1):
                                                             r)  # change if you want to run another model
             score = score * 100.0
             aux_score = aux_score * 100.00  # also remove everything regarding aux_score if a different model is used
-            print('>#%d: LSTM = %.3f and Multi = %.3f' % (r + 1, score, aux_score))
+            print('>#%d: LSTM = %.3f and Multi = %.3f' % (r + 1, aux_score, score))
             scores.append(score)
         gridresults.append((cfg, scores))
 
