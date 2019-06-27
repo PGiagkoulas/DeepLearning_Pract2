@@ -9,6 +9,67 @@ from numpy import dstack
 from pandas import read_csv
 from keras.utils import to_categorical
 
+
+
+########################### grid functions
+
+def giveSingleParameters():
+    verbose = [0]
+    batch_size = [128]
+    optimizer = ['adam']
+    epochs = [9]
+    activation = ['relu']
+    kernel_size_2D = [(1, 3)]
+    kernel_size_1D = [3]
+    filters = [64]
+    pool_size = [2]
+    loss = ['categorical_crossentropy']
+    out_activation = ['softmax']
+    dropout_rate = [0.5]
+    return dict(verbose=verbose, epochs=epochs, batch_size=batch_size, activation=activation,
+                kernel_size_2D=kernel_size_2D, kernel_size_1D=kernel_size_1D, filters=filters, pool_size=pool_size,
+                loss=loss, out_activation=out_activation, optimizer=optimizer, dropout_rate=dropout_rate)
+
+# give the parameters for grid search
+def giveParameters():
+    verbose = [0]
+    batch_size = [128]
+    optimizer = ['adam']
+    epochs = [9]
+    activation = ['relu']
+    kernel_size_2D = [(1, 3)]
+    kernel_size_1D = [3]
+    filters = [64]
+    pool_size = [2]
+    loss = ['categorical_crossentropy']
+    out_activation = ['softmax']
+    dropout_rate = [0.5]
+    return dict(verbose=verbose, epochs=epochs, batch_size=batch_size, activation=activation,
+                kernel_size_2D=kernel_size_2D, kernel_size_1D=kernel_size_1D, filters=filters, pool_size=pool_size,
+                loss=loss, out_activation=out_activation, optimizer=optimizer, dropout_rate=dropout_rate)
+
+def summarize_gridresults(gridresults):
+    for x in gridresults:
+        print(x[0])  # prints the config
+        summarize_results(x[1])  # prints the scores
+
+
+def defineConfigurations():
+    cfgs = list()
+    parameters = giveParameters()
+    return list((dict(zip(parameters, x)) for x in product(*parameters.values())))
+
+
+def printBestGrid(gridresults):
+    best = gridresults[0]
+    for x in gridresults:
+        if mean(x[1]) > mean(best[1]):
+            best = x
+    print("best result:")
+    print(best[0])
+    summarize_results(best[1])
+
+
 # helper function to save model results to csv files
 def saveResults(name, fittingProcess, accuracy, aux_accuracy, loss, aux_loss, n):
     loss_history = fittingProcess.history['main_output_loss']
