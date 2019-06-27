@@ -68,7 +68,7 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
                                                           batch_size=batch_size, verbose=1)
     # saveResults("convLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
 
-    return accuracy, aux_acc, model
+    return accuracy, aux_acc
 
 
 # fit and evaluate a multi-input/multi-output CNN-LSTM model
@@ -118,7 +118,7 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
                                                           batch_size=batch_size, verbose=1)
 
     # saveResults("cnnLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
-    return accuracy, aux_acc, model
+    return accuracy, aux_acc
 
 
 # fit and evaluate a multi-input/multi-output residual LSTM model
@@ -161,16 +161,14 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     main_input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
     lstm_out0 = CuDNNLSTM(100, return_sequences=True)(main_input_stacked)
     lstm_out1 = CuDNNLSTM(100, return_sequences=True)(lstm_out0)
-    lstm_out2 = CuDNNLSTM(100, return_sequences=True)(lstm_out1)
-    lstm_out3 = CuDNNLSTM(100, return_sequences=False)(lstm_out2)
-    drop_out0 = Dropout(rate=0.5)(lstm_out3)
-    # lstm_out4=LSTM(9, activation='tanh',recurrent_dropout=0.2, dropout=0.2, return_sequences=False)(lstm_out3)
+    lstm_out2 = CuDNNLSTM(100, return_sequences=False)(lstm_out1)
+    drop_out0 = Dropout(rate=0.5)(lstm_out2)
     Dense_out = Dense(100, activation='relu')(drop_out0)
     auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(Dense_out)
     num_features = aux_trainX.shape[1]
     auxiliary_input = Input(shape=(num_features,), name='aux_input')
     # combine inputs
-    x = Concatenate()([lstm_out3, auxiliary_input])
+    x = Concatenate()([lstm_out2, auxiliary_input])
     # rest of the network
     x = Dense(96, activation='relu')(x)
     x = Dense(64, activation='relu')(x)
@@ -180,7 +178,7 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
     model = Model(inputs=[main_input_stacked, auxiliary_input], outputs=[main_output, auxiliary_output])
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     # checkpoint
-    checkpointer = ModelCheckpoint(filepath='res_lstm.h5', monitor='val_main_output_acc', verbose=1,
+    checkpointer = ModelCheckpoint(filepath='stacked_lstm.h5', monitor='val_main_output_acc', verbose=1,
                                    save_best_only=True, save_weights_only=False, mode='auto', period=1)
     history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)

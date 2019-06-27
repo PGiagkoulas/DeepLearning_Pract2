@@ -59,7 +59,7 @@ def run_experiment(repeats=1):
     for cfg in cfg_list:
         scores = list()
         for r in range(repeats):
-            score, aux_score, model = model(trainX, trainy, testX, testy, aux_trainX, aux_trainy,
+            score, aux_score = model(trainX, trainy, testX, testy, aux_trainX, aux_trainy,
                                                             aux_testX, aux_testy, cfg,
                                                             r)  # change if you want to run another model
             score = score * 100.0
