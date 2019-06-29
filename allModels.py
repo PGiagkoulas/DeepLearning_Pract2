@@ -125,7 +125,7 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
 
 # fit and evaluate a multi-input/multi-output residual LSTM model
 def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean, n):
-    verbose, epochs, batch_size = 0, 25, 64
+    verbose, epochs, batch_size = 0, 2, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     # define model
     main_input_res = Input(shape=(n_timesteps, n_features), name='residual_lstm_input')
@@ -159,7 +159,7 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
 # fit and evaluate a multi-input/multi-output stacked LSTM model
 def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, grid_boolean, cfg,
                                       n):
-    verbose, epochs, batch_size = 0, 25, 64
+    verbose, epochs, batch_size = 0, 2, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     main_input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
     lstm_out0 = CuDNNLSTM(50, return_sequences=True)(main_input_stacked)

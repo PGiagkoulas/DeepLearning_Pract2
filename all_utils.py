@@ -5,6 +5,8 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 
 import numpy as np
+from numpy import mean
+from numpy import std
 from numpy import dstack
 from pandas import read_csv
 from keras.utils import to_categorical
@@ -37,14 +39,14 @@ def giveParameters():
     batch_size = [64, 128]
     optimizer = ['adam', 'sgd']
     epochs = [15]
-    activation = ['relu', 'tanh']
+    activation = ['relu', 'sigmoid', 'tanh']
     kernel_size_2D = [(1, 3)]
     kernel_size_1D = [3]
     filters = [64]
     pool_size = [2]
     loss = ['categorical_crossentropy']
     out_activation = ['softmax']
-    dropout_rate = [0.2, 0.5]
+    dropout_rate = [0, 0.25, 0.5]
     return dict(verbose=verbose, epochs=epochs, batch_size=batch_size, activation=activation,
                 kernel_size_2D=kernel_size_2D, kernel_size_1D=kernel_size_1D, filters=filters, pool_size=pool_size,
                 loss=loss, out_activation=out_activation, optimizer=optimizer, dropout_rate=dropout_rate)
@@ -69,6 +71,13 @@ def printBestGrid(gridresults):
     print("best result:")
     print(best[0])
     summarize_results(best[1])
+
+########################### summarize scores
+
+def summarize_results(scores):
+    print(scores)
+    m, s = mean(scores), std(scores)
+    print('Accuracy: %.3f%% (+/-%.3f)' % (m, s))
 
 
 # helper function to save model results to csv files
