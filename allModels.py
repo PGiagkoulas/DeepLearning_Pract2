@@ -125,25 +125,36 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
 
 # fit and evaluate a multi-input/multi-output residual LSTM model
 def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean, n):
-    verbose, epochs, batch_size = 0, 2, 64
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
+
+    # get parameters from cfg
+    verbose = cfg.get('verbose') if ('verbose' in cfg) else 0
+    epochs = cfg.get('epochs') if ('epochs' in cfg) else 25
+    batch_size = cfg.get('batch_size') if ('batch_size' in cfg) else 64
+    activation = cfg.get('activation') if ('activation' in cfg) else 'relu'
+    optimizer = cfg.get('optimizer') if ('optimizer' in cfg) else 'adam'
+    dropout_rate = cfg.get('dropout_rate') if ('dropout_rate' in cfg) else 0.5
+
     # define model
     main_input_res = Input(shape=(n_timesteps, n_features), name='residual_lstm_input')
     lstm_out = residual_lstm_layers(main_input_res, rnn_width=50, rnn_depth=4, rnn_dropout=0.2)
-    dense_out = Dense(100, activation='relu')(lstm_out)
+    dense_out = Dense(100, activation=activation)(lstm_out)
     auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(dense_out)
     num_features = aux_trainX.shape[1]
     auxiliary_input = Input(shape=(num_features,), name='aux_input')
     # combine inputs
     x = Concatenate()([lstm_out, auxiliary_input])
     # rest of the network
-    x = Dense(96, activation='relu')(x)
-    x = Dense(64, activation='relu')(x)
-    x = Dense(32, activation='relu')(x)
+    x = Dense(96, activation=activation)(x)
+    x = Dropout(rate=dropout_rate)(x)
+    x = Dense(64, activation=activation)(x)
+    x = Dropout(rate=dropout_rate)(x)
+    x = Dense(32, activation=activation)(x)
+    x = Dropout(rate=dropout_rate)(x)
     # final output
     main_output = Dense(n_outputs, activation='softmax', name='main_output')(x)
     model = Model(inputs=[main_input_res, auxiliary_input], outputs=[main_output, auxiliary_output])
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
     # checkpoint
     checkpointer = ModelCheckpoint(filepath='res_lstm.h5', monitor='val_main_output_acc', verbose=1,
                                    save_best_only=True, save_weights_only=False, mode='auto', period=1)
@@ -159,27 +170,37 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
 # fit and evaluate a multi-input/multi-output stacked LSTM model
 def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, grid_boolean, cfg,
                                       n):
-    verbose, epochs, batch_size = 0, 2, 64
+    # get parameters from cfg
+    verbose = cfg.get('verbose') if ('verbose' in cfg) else 0
+    epochs = cfg.get('epochs') if ('epochs' in cfg) else 25
+    batch_size = cfg.get('batch_size') if ('batch_size' in cfg) else 64
+    activation = cfg.get('activation') if ('activation' in cfg) else 'relu'
+    optimizer = cfg.get('optimizer') if ('optimizer' in cfg) else 'adam'
+    dropout_rate = cfg.get('dropout_rate') if ('dropout_rate' in cfg) else 0.5
+
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     main_input_stacked = Input(shape=(n_timesteps, n_features), name='stacked_lstm_input')
     lstm_out0 = CuDNNLSTM(50, return_sequences=True)(main_input_stacked)
     lstm_out1 = CuDNNLSTM(50, return_sequences=True)(lstm_out0)
     lstm_out2 = CuDNNLSTM(50, return_sequences=False)(lstm_out1)
-    drop_out0 = Dropout(rate=0.5)(lstm_out2)
-    Dense_out = Dense(100, activation='relu')(drop_out0)
+    drop_out0 = Dropout(rate=dropout_rate)(lstm_out2)
+    Dense_out = Dense(100, activation=activation)(drop_out0)
     auxiliary_output = Dense(n_outputs, activation='softmax', name='aux_output')(Dense_out)
     num_features = aux_trainX.shape[1]
     auxiliary_input = Input(shape=(num_features,), name='aux_input')
     # combine inputs
     x = Concatenate()([lstm_out2, auxiliary_input])
     # rest of the network
-    x = Dense(96, activation='relu')(x)
-    x = Dense(64, activation='relu')(x)
-    x = Dense(32, activation='relu')(x)
+    x = Dense(96, activation=activation)(x)
+    x = Dropout(rate=dropout_rate)(x)
+    x = Dense(64, activation=activation)(x)
+    x = Dropout(rate=dropout_rate)(x)
+    x = Dense(32, activation=activation)(x)
+    x = Dropout(rate=dropout_rate)(x)
     # final output
     main_output = Dense(n_outputs, activation='softmax', name='main_output')(x)
     model = Model(inputs=[main_input_stacked, auxiliary_input], outputs=[main_output, auxiliary_output])
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
     # checkpoint
     checkpointer = ModelCheckpoint(filepath='stacked_lstm.h5', monitor='val_main_output_acc', verbose=1,
                                    save_best_only=True, save_weights_only=False, mode='auto', period=1)
