@@ -128,7 +128,7 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
 
     # get parameters from cfg
-    verbose = cfg.get('verbose') if ('verbose' in cfg) else 0
+    verbose = 0
     epochs = cfg.get('epochs') if ('epochs' in cfg) else 25
     batch_size = cfg.get('batch_size') if ('batch_size' in cfg) else 64
     activation = cfg.get('activation') if ('activation' in cfg) else 'relu'
@@ -171,7 +171,7 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
 def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, grid_boolean, cfg,
                                       n):
     # get parameters from cfg
-    verbose = cfg.get('verbose') if ('verbose' in cfg) else 0
+    verbose = 0
     epochs = cfg.get('epochs') if ('epochs' in cfg) else 25
     batch_size = cfg.get('batch_size') if ('batch_size' in cfg) else 64
     activation = cfg.get('activation') if ('activation' in cfg) else 'relu'
