@@ -168,7 +168,7 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
 
 
 # fit and evaluate a multi-input/multi-output stacked LSTM model
-def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, grid_boolean, cfg,
+def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean,
                                       n):
     # get parameters from cfg
     verbose = 0
