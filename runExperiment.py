@@ -28,7 +28,7 @@ args = parser.parse_args()
 
 
 # run an experiment
-def run_experiment(repeats=1):
+def run_experiment():
     # load data
     trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy = all_utils.load_dataset()
     grid = True
