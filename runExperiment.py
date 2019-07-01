@@ -31,7 +31,6 @@ args = parser.parse_args()
 def run_experiment():
     # load data
     trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy = all_utils.load_dataset()
-    grid = True
 
     if args.grid:
         cfg_list = all_utils.defineConfigurations()  # list with all possible configurations
@@ -57,7 +56,7 @@ def run_experiment():
             scores.append(score)
         gridresults.append((cfg, scores))
 
-    if grid:
+    if args.grid:
         all_utils.summarize_gridresults(gridresults)
     all_utils.printBestGrid(gridresults)
 
