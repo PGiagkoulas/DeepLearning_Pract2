@@ -17,13 +17,23 @@ from fineTuning import fine_tune_convlstm
 
 # if grid is enabled it will print the best configuration at the end, use this anew with only those parameters in giveParameters to get the csv's of the best config
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description='Run a model.')
 parser.add_argument('--arch', type=str, default='conv_lstm',
-                    help='Architecture to use.')
-parser.add_argument('--grid', type=bool, default=False,
-                    help='Whether or not to do grid search.')
+					help='Architecture to use.')
+parser.add_argument('--grid', type=str2bool, default=False,
+					help='Wether or not to do grid search.')
 parser.add_argument('--repeats', type=int, default=5,
-                    help='Amount of repeats to get mean score.')
+					help='Amount of repeats to get mean score.')
 args = parser.parse_args()
 
 
