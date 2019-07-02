@@ -58,8 +58,7 @@ def run_experiment():
         scores = list()
         for r in range(repeats):
             score, aux_score = model(trainX, trainy, testX, testy, aux_trainX, aux_trainy,
-                                     aux_testX, aux_testy, cfg,
-                                     args.grid, r)  # change if you want to run another model
+                                     aux_testX, aux_testy, cfg, r)  # change if you want to run another model
             score = score * 100.0
             aux_score = aux_score * 100.00  # also remove everything regarding aux_score if a different model is used
             print('>#%d: LSTM = %.3f and Multi = %.3f' % (r + 1, aux_score, score))

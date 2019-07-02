@@ -16,7 +16,7 @@ from all_utils import saveResults, unfold_general_hyperparameters, residual_lstm
 
 
 # fit and evaluate a multi-input/multi-output ConvLSTM model
-def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean, n):
+def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
     ## datastuff
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     n_aux_features = aux_trainX.shape[1]
@@ -66,14 +66,12 @@ def evaluate_convlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
     # print(model.summary())
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
-    if grid_boolean:
-        saveResults("convLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
-
+    saveResults("convLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 
 # fit and evaluate a multi-input/multi-output CNN-LSTM model
-def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean, n):
+def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
     ## data stuff
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
     # reshape data into time steps of sub-sequences
@@ -117,14 +115,12 @@ def evaluate_cnnlstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_t
                         verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
-
-    if grid_boolean:
-        saveResults("cnnLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    saveResults("cnnLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 
 # fit and evaluate a multi-input/multi-output residual LSTM model
-def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean, n):
+def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
     n_timesteps, n_features, n_outputs = trainX.shape[1], trainX.shape[2], trainy.shape[1]
 
     # get parameters from cfg
@@ -162,14 +158,12 @@ def evaluate_res_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_
                         verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy],
                                                           batch_size=batch_size, verbose=1)
-    if grid_boolean:
-        saveResults("resLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    saveResults("resLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 
 # fit and evaluate a multi-input/multi-output stacked LSTM model
-def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, grid_boolean,
-                                      n):
+def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, aux_trainy, aux_testX, aux_testy, cfg, n):
     # get parameters from cfg
     verbose = 0
     epochs = cfg.get('epochs') if ('epochs' in cfg) else 25
@@ -206,8 +200,7 @@ def evaluate_stacked_lstm_multi_model(trainX, trainy, testX, testy, aux_trainX, 
                                    save_best_only=True, save_weights_only=False, mode='auto', period=1)
     history = model.fit(x=[trainX, aux_trainX], y=[trainy, aux_trainy], epochs=epochs, batch_size=batch_size, verbose=verbose, validation_data=([testX, aux_testX], [testy, aux_testy]), callbacks=[checkpointer])
     _, loss, aux_loss, accuracy, aux_acc = model.evaluate(x=[testX, aux_testX], y=[testy, aux_testy], batch_size=batch_size, verbose=1)
-    if grid_boolean:
-        saveResults("stackedLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
+    saveResults("stackedLstmMulti", history, accuracy, aux_acc, loss, aux_loss, n)
     return accuracy, aux_acc
 
 
