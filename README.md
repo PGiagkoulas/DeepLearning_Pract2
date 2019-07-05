@@ -35,6 +35,6 @@ source activate kears_env
 
 | arguments          | setting    |
 | ------------- |---------------|
-| repeats| The number you want to repeat your experiments |
-| grid | Weather execute grid search for optimal parameter search or not, under True or False  |
-| arch | The choice of model architecture, can be chosen in ['conv_lstm','cnn_lstm','res_lstm','stacked_lstm'] |
+| repeats| The number we repeat our experiments |
+| grid | Weather execute grid search or not, set True or False  |
+| arch | The choice of model architecture, chosen in ['conv_lstm','cnn_lstm','res_lstm','stacked_lstm'] |
