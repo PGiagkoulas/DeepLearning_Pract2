@@ -33,6 +33,9 @@ To run the program, activate proper environments first:
 source activate kears_env
 ```
 
+Flags explaination for running code:
+
+
 | arguments          | setting    |
 | ------------- |---------------|
 | repeats| The number we repeat our experiments |
