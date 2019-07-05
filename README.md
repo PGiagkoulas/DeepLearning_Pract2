@@ -44,7 +44,7 @@ Flags available to modify our experiment setting
 
 start training and test one model with a command like this:
 
-```python
+```bat
 python runExperiment.py --grid True --arch conv_lstm --repeat 5
 ```
 
