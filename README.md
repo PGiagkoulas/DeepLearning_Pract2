@@ -33,7 +33,7 @@ To run the program, activate proper environments first:
 source activate kears_env
 ```
 
-Flags explaination for running code:
+Flags available to modify our experiment setting
 
 
 | arguments          | setting    |
