@@ -7,4 +7,12 @@ Performance comparison based on [CNNLSTM](https://arxiv.org/abs/1411.4389), [Con
 
 [Anaconda](https://www.anaconda.com)
 
+<ul style="list-style: none;">
+  
+  <li>python 3.6.7</li>
+  <li>Tensorflow 1.12.0</li>
+  <li>keras 2.2.4</li>
+
+</ul>
+
 For StackedLSTM and ResLSTM, the experiments must be executed on one GPU with CUDA support.  
