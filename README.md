@@ -24,3 +24,11 @@ For StackedLSTM and ResLSTM, the experiments must be executed on one GPU with CU
 | allModels.py | The definition for 4 different models |
 | all_utils.py | The different supplementary functions we used |
 | runExperiment.py| The execution of the experiments |
+
+## Running the experiments
+
+To run the program, activate proper environments first:
+
+```python
+source activate kears_env
+```
