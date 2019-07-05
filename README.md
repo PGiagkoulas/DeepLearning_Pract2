@@ -4,8 +4,7 @@ Performance comparison based on [CNNLSTM](https://arxiv.org/abs/1411.4389), [Con
 ## Environment Requirements 
 
 [Miniconda](https://docs.conda.io/en/latest/miniconda.html) 
+
 [Anaconda](https://www.anaconda.com)
 
-### Note that 
- 
-For StackedLSTM and ResLSTM, the experiments must be executed on One GPU with CUDA support.  
+For StackedLSTM and ResLSTM, the experiments must be executed on one GPU with CUDA support.  
