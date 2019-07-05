@@ -41,3 +41,11 @@ Flags available to modify our experiment setting
 | repeats| The number we repeat our experiments |
 | grid | Weather execute grid search or not, set True or False  |
 | arch | The choice of model architecture, chosen in ['conv_lstm', 'cnn_lstm', 'res_lstm', 'stacked_lstm'] |
+
+start training and test one model with a command like this:
+
+```python
+python runExperiment.py --grid True --arch conv_lstm --repeat 5
+```
+
+
