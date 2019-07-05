@@ -17,9 +17,10 @@ Performance comparison based on [CNNLSTM](https://arxiv.org/abs/1411.4389), [Con
 
 For StackedLSTM and ResLSTM, the experiments must be executed on one GPU with CUDA support.  
 
+## Explaination for every function file
+
 | filename          | Functionality      |
 | ------------- |---------------|
-| SNN/snn_fashion_mnist.py | The original structure and hyperparameters |
-| SNN/snn_fashion_mnist_lr_optimizer.py | Compare Momentum and Adam with different learning rates |
-| SNN/snn_fashion_mnist_dropout.py | Compare different dropout rates |
-| SNN/snn_fashion_mnist_optimal.py|           The final model with optimal settings|
+| allModels.py | The definition for 4 different models |
+| all_utils.py | The different supplementary functions we used |
+| runExperiment.py| The execution of the experiments |
