@@ -30,7 +30,7 @@ For StackedLSTM and ResLSTM, the experiments must be executed on one GPU with CU
 To run the program, activate proper environments first:
 
 ```python
-source activate kears_env
+source activate keras_env
 ```
 
 Flags available to modify our experiment setting
