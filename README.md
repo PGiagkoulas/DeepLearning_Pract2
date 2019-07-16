@@ -22,7 +22,7 @@ For StackedLSTM and ResLSTM, the experiments must be executed on one GPU with CU
 | filename          | Functionality      |
 | ------------- |---------------|
 | allModels.py | The definition for 4 different models |
-| all_utils.py | The different supplementary functions we used |
+| all_utils.py | The different supplementary infrastructure functions we used |
 | runExperiment.py| The execution of the experiments |
 
 ## Running the experiments
